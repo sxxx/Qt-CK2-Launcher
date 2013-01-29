@@ -11,11 +11,17 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    firstdialog.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    firstdialog.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    firstdialog.ui
 
 OTHER_FILES += \
-    qtck2launcher.ini
+    CHANGELOG.md \
+    README.md
+
+RESOURCES +=

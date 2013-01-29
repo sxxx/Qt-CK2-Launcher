@@ -1,81 +1,66 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
-#define CK2_LAUNCHER_CONF "qtck2launcher.ini"
+#include "firstdialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    settings(new QSettings)
 {
-    ui->setupUi(this);
-    QSettings Settings(CK2_LAUNCHER_CONF, QSettings::IniFormat);
+    // Check if this first run
+    if (! settings->value("internal/isConfigured").toBool()) {
+        // Open modal dialog
+        FirstDialog dialog(this);
+        dialog.exec();
 
-    QObject::connect(ui->webView, SIGNAL(loadFinished(bool)), SLOT(onLoadFinished(bool)));
-    QObject::connect(ui->buttonReg, SIGNAL(clicked()), this, SLOT(onClick_register()));
-    QObject::connect(ui->buttonRun, SIGNAL(clicked()), this, SLOT(onClick_run()));
+        // Quit if user press Cancel or close dialog window
+        if (!dialog.dialogCompleted) {
+            parent->close();
+        }
+    }
+
+    ui->setupUi(this);
+    // Load Styles
+    loadStyles();
     // Load launcher page
-    ui->webView->load(QUrl(Settings.value("launcherurl").toString()));
+    ui->webView->load(QUrl(settings->value("internal/urlLauncher").toString()));
     // Disable context menu
     ui->webView->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->webView->show();
 
-    foreach(QString modName, listFiles(QDir::homePath() + Settings.value("configpath").toString() + "/mod/", "*.mod"))
+    foreach(QString modName, listFiles(settings->value("userOptions/pathConfig").toString() + "mod/", "*.mod"))
     {
-        QString modIniName = getName(QDir::homePath() + Settings.value("configpath").toString() + "/mod/", modName);
+        QString modIniName = extractName(settings->value("userOptions/pathConfig").toString() + "/mod/", modName);
 
-        QString modIniName2 = modIniName;
-        modIniName2 += "_n";
-
-        if (!Settings.contains(modIniName2))
-        {
-            Settings.setValue(modIniName2, modName);
-            Settings.setValue(modName, Qt::Unchecked);
-        }
+        if (!settings->contains(modName))
+            settings->setValue(modName, Qt::Unchecked);
 
         QListWidgetItem *itemOne = new QListWidgetItem(
             modIniName,
-            ui->modList);
-        if (Settings.value(modName) == Qt::Checked)
+            ui->listMod);
+        if (settings->value(modName) == Qt::Checked)
             itemOne->setCheckState(Qt::Checked);
         else
             itemOne->setCheckState(Qt::Unchecked);
-        itemOne->setSelected(-1);
+        itemOne->setData(Qt::UserRole, modName);
     }
 
-
-
-
-
-
-
-    foreach(QString dlcName, listFiles(QDir::homePath() + Settings.value("gamepath").toString() + "/dlc/", "*.dlc"))
+    foreach(QString dlcName, listFiles(settings->value("userOptions/pathGame").toString() + "/dlc/", "*.dlc"))
     {
-        QString dlcIniName = getName(QDir::homePath() + Settings.value("gamepath").toString() + "/dlc/", dlcName);
-
-        QString dlcIniName2 = dlcIniName;
-        dlcIniName2 += "_n";
-
-
-        if (!Settings.contains(dlcIniName2))
+        QString dlcIniName = extractName(settings->value("userOptions/pathGame").toString() + "/dlc/", dlcName);
+        if (!settings->contains(dlcName))
         {
-            Settings.setValue(dlcIniName2, dlcName);
-            Settings.setValue(dlcName, Qt::Checked);
+            settings->setValue(dlcName, Qt::Checked);
         }
 
         QListWidgetItem *itemOne = new QListWidgetItem(
             dlcIniName,
-            ui->dlcList);
-        if (Settings.value(dlcName) == Qt::Checked)
+            ui->listDLC);
+        if (settings->value(dlcName) == Qt::Checked)
             itemOne->setCheckState(Qt::Checked);
         else
             itemOne->setCheckState(Qt::Unchecked);
-        itemOne->setSelected(-1);
+        itemOne->setData(Qt::UserRole, dlcName);
     }
-
-    // register clicks
-    QObject::connect(ui->modList, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(on_list_itemChangedMod(QListWidgetItem *)));
-    QObject::connect(ui->dlcList, SIGNAL(itemChanged(QListWidgetItem *)), this, SLOT(on_list_itemChangedDLC(QListWidgetItem *)));
-
 }
 
 QStringList MainWindow::listFiles(QString directory, QString extension)
@@ -86,9 +71,8 @@ QStringList MainWindow::listFiles(QString directory, QString extension)
     return modDir.entryList(filters, QDir::Files);
 }
 
-QString MainWindow::getName(QString iniDir, QString iniName)
+QString MainWindow::extractName(QString iniDir, QString iniName)
 {
-    //qDebug() << iniName;
     QSettings ini(iniDir.append(iniName), QSettings::IniFormat);
 
     if (ini.value("name").toString() == "")
@@ -97,85 +81,80 @@ QString MainWindow::getName(QString iniDir, QString iniName)
         return ini.value("name").toString();
 }
 
-void MainWindow::on_list_itemChangedMod(QListWidgetItem* changed)
+/**
+  Launcher use original game (proprietary) content which can't going bundled with this code.
+  For now don't find any better way to change path to background images and icon.
+  */
+void MainWindow::loadStyles()
 {
-    QSettings Settings(CK2_LAUNCHER_CONF, QSettings::IniFormat);
+    QString launcherPath = settings->value("userOptions/pathGame").toString()+"launcher/";
+    QIcon icon;
+    icon.addFile(launcherPath+"logo.ico", QSize(), QIcon::Normal, QIcon::Off);
+    setWindowIcon(icon);
+
+    ui->widget->setStyleSheet("background-image: url("+launcherPath+"background.jpg);");
+    ui->buttonRegister->setStyleSheet("background-image: url("+launcherPath+"button_small.jpg);border-width: 1px;");
+    ui->buttonRun->setStyleSheet("background-image: url("+launcherPath+"button_big.jpg);border-width: 1px;");
+}
+
+
+
+/*  *   *   *   *   *   *   *   *   *
+            Slots
+ *  *   *   *   *   *   *   *   *   */
+
+void MainWindow::listItemChanged(QListWidgetItem* changed)
+{
+
     bool checked = changed->checkState() == Qt::Checked;
     int index = 0;
-    for (; ui->modList->item(index) != changed; index++) ;
+    for (; changed->listWidget()->item(index) != changed; index++) ;
 
-    QString modName = Settings.value(changed->text() + "_n").toString();
+    QString modName = changed->data(Qt::UserRole).toString();
     if (checked)
     {
-        Settings.setValue(modName, Qt::Checked);
+        settings->setValue(modName, Qt::Checked);
     }
     else
     {
-        Settings.setValue(modName, Qt::Unchecked);
+        settings->setValue(modName, Qt::Unchecked);
     }
-    Settings.sync();
+    settings->sync();
 }
 
-void MainWindow::on_list_itemChangedDLC(QListWidgetItem* changed)
+void MainWindow::buttonClickedRegister()
 {
-    QSettings Settings(CK2_LAUNCHER_CONF, QSettings::IniFormat);
-    bool checked = changed->checkState() == Qt::Checked;
-    int index = 0;
-    for (; ui->dlcList->item(index) != changed; index++) ;
-
-    QString modName = Settings.value(changed->text() + "_n").toString();
-    if (checked)
-    {
-        Settings.setValue(modName, Qt::Checked);
-    }
-    else
-    {
-        Settings.setValue(modName, Qt::Unchecked);
-    }
-    Settings.sync();
+    QDesktopServices::openUrl(QUrl(settings->value("urlRegister").toString(), QUrl::TolerantMode));
 }
 
-void MainWindow::onLoadFinished(bool okay)
+void MainWindow::buttonClickedRun()
 {
-  if ( ! okay )
-  {
-      ui->webView->load(QUrl("launcher/launcher.html"));
-  }
-}
-
-void MainWindow::onClick_register()
-{
-    QSettings Settings(CK2_LAUNCHER_CONF, QSettings::IniFormat);
-    QDesktopServices::openUrl(QUrl(Settings.value("registerurl").toString(), QUrl::TolerantMode));
-}
-
-void MainWindow::onClick_run()
-{
-    QSettings Settings(CK2_LAUNCHER_CONF, QSettings::IniFormat);
-    QString program = Settings.value("runBinary").toString();
     QStringList arguments;
-
-    // Check current status
-    QStringList keysList = Settings.allKeys();
-    foreach(QString key, keysList)
-    {
-        if (key.right(4) == ".mod" && Settings.value(key) == Qt::Checked)
-        {
+    QStringList keysList = settings->allKeys();
+    foreach(QString key, keysList) {
+        if (key.right(4) == ".mod" && settings->value(key) == Qt::Checked) {
             arguments << "-mod=mod/" + key;
         }
-        else if (key.right(4) == ".dlc" && Settings.value(key) == Qt::Unchecked)
-        {
+        else if (key.right(4) == ".dlc" && settings->value(key) == Qt::Unchecked) {
             arguments << "-exclude_dlc=dlc/" + key;
         }
     }
 
     QProcess *gameProcess = new QProcess();
-    gameProcess->start(program, arguments);
+    gameProcess->start(
+        settings->value("userOptions/pathGame").toString()+settings->value("internal/executableName").toString(),
+        arguments);
     gameProcess->closeWriteChannel();
 
     // Quit after CK2 running
     QApplication::quit();
+}
 
+void MainWindow::webviewLoadFinished(bool status)
+{
+    if (!status) {
+        ui->webView->load(QUrl(settings->value("userOptions/pathGame").toString()+"launcher/launcher.html"));
+    }
 }
 
 MainWindow::~MainWindow()

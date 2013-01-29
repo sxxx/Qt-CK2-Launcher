@@ -3,8 +3,6 @@
 
 #include <QMainWindow>
 #include <QListWidget>
-// Move window in center of screen
-#include <QDesktopWidget>
 // Store configs
 #include <QSettings>
 // Filesystem access
@@ -23,6 +21,10 @@
 #include <QMessageBox>
 #include <QDesktopServices>
 
+// Save state on close
+#include <QCloseEvent>
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -32,22 +34,22 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
+    QHash<QString, QHash<QString,QVariant> > data;
+    QSettings *settings;
     explicit    MainWindow(QWidget *parent = 0);
                ~MainWindow();
 
-
 private:
     Ui::MainWindow *ui;
-
     QStringList listFiles(QString directory, QString extension);
-    QString     getName(QString iniDir, QString iniName);
+    QString     extractName(QString iniDir, QString iniName);
+    void        loadStyles();
 
 private slots:
-    void        onClick_register();
-    void        onClick_run();
-    void        onLoadFinished(bool okay);
-    void        on_list_itemChangedMod(QListWidgetItem* changed);
-    void        on_list_itemChangedDLC(QListWidgetItem* changed);
+    void        listItemChanged(QListWidgetItem* changed);
+    void        buttonClickedRegister();
+    void        buttonClickedRun();
+    void        webviewLoadFinished(bool status);
 };
 
 #endif // MAINWINDOW_H

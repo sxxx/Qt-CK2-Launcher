@@ -6,37 +6,43 @@ This is open source launcher for Crusader Kings 2 based on QT4.
 Thread on Paradox Plaza:
 http://forum.paradoxplaza.com/forum/showthread.php?660805-Qt-Alternative-CK2-Launcher
 
-
-Screenshot:
-![Main Windows](https://github.com/sxxx/Qt-CK2-Launcher/blob/master/screenshot.png?raw=true)
-
-
 ## How to Install
-On Ubuntu 12.04:
+You could get pre-compiled deb/rpm packages from openSUSE Build Service.
+Both x86 and x86_64 builds available for these distibutions:
+* Ubuntu 12.10 "Quantal", 12.04 "Precise", 11.10 "Oneiric", 11.04 "Natty", 10.04 "Lucid"
+* Debian 6.0 "Squeeze"
+* Fedora: 18 "Spherical Cow", 17 "Beefy Miracle", 16 "Verne"
+* Mandriva: 2011, 2010.1, 2010
+* openSUSE: Factory, 12.2, 12.1, 11.4
+* SLE 11: SP2, SP1
 
-#### 1. Compile launcher:
+Page with links and inststucions:
+http://software.opensuse.org/download.html?project=home:sxxxx&package=qtck2launcher
+
+Extra information about builds could be forund here:
+https://build.opensuse.org/package/show?package=qtck2launcher&project=home%3Asxxxx
+
+I cant test all these builds, so if something not working let me know.
+
+## Compile on Ubuntu 12.04:
 ```no-highlight
-sudo apt-get install git build-essential libqt4-dev qt4-qmake
+sudo apt-get install git build-essential libqt4-dev qt4-qmake libqtwebkit-dev
 git clone https://github.com/sxxx/Qt-CK2-Launcher.git
 cd Qt-CK2-Launcher
 qmake
 make
 ```
-#### 2. Edit qtck2launcher.ini:
-There is lot of people who probably want to change **gamepath** and **runBinary** values.
-Lot of people have Steam games installed to
->~/.local/share/Steam/SteamApps/common/
-Not like my default:
->~/Steam/SteamApps/common/
 
-#### 3. Move files:
-Move qtck2launcher and qtck2launcher.ini to "_/Steam/SteamApps/common/Crusader Kings II_" directory.
+## Use launcher with Steam:
+Launcher is fully compitable with Steam overlay and DLC activation.
 
-#### 4. Use launcher with Steam:
-If you want to use launcher with Steam you need to rename original "ck2" executable and update **runBinary** value inside ini file. 
->runBinary=./ck2original
-Than you need to rename (or make symlink/hardlink) qtck2launcher to "ck2".
+If you want to use launcher with Steam there is how-to:
+1. Run Steam and open "Library" window.
+2. Right click on CK2 in game list.
+3. Click on "Properties"
+4. Push "Set launch options..." button
+5. Input "qtck2launcher %command%" and push "Ok"
+6. Now launcher will work like in Windows version.
 
-Now you could run game though Steam and you will see launcher.
-After you press "Start CK2 button" game will start like on Windows, Steam overlay will be fully functionaly.
-
+## Nice screenshot:
+![Main Window](https://github.com/sxxx/Qt-CK2-Launcher/blob/master/screenshot.png?raw=true)

@@ -7,15 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>699</width>
-    <height>548</height>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Crusader Kings 2</string>
-  </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>launcher/logo.ico</normaloff>launcher/logo.ico</iconset>
   </property>
   <property name="toolTip">
    <string/>
@@ -60,31 +56,8 @@
      <bool>true</bool>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(launcher/background.jpg);</string>
+     <string notr="true"/>
     </property>
-    <widget class="QPushButton" name="buttonReg">
-     <property name="geometry">
-      <rect>
-       <x>530</x>
-       <y>40</y>
-       <width>160</width>
-       <height>25</height>
-      </rect>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-image: url(launcher/button_small.jpg);
-border-width: 1px;</string>
-     </property>
-     <property name="text">
-      <string>Register</string>
-     </property>
-     <property name="flat">
-      <bool>false</bool>
-     </property>
-    </widget>
     <widget class="QLabel" name="textDLC">
      <property name="geometry">
       <rect>
@@ -98,7 +71,7 @@ border-width: 1px;</string>
       <string>Select DLC's</string>
      </property>
     </widget>
-    <widget class="QListWidget" name="modList">
+    <widget class="QListWidget" name="listMod">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -107,8 +80,11 @@ border-width: 1px;</string>
        <height>101</height>
       </rect>
      </property>
+     <property name="autoFillBackground">
+      <bool>true</bool>
+     </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">selection-background-color: rgb(255, 255, 255);</string>
      </property>
     </widget>
     <widget class="QLabel" name="textMod">
@@ -124,7 +100,7 @@ border-width: 1px;</string>
       <string>Select mods to play</string>
      </property>
      <property name="buddy">
-      <cstring>modList</cstring>
+      <cstring>listMod</cstring>
      </property>
     </widget>
     <widget class="QPushButton" name="buttonRun">
@@ -133,15 +109,14 @@ border-width: 1px;</string>
        <x>530</x>
        <y>90</y>
        <width>160</width>
-       <height>50</height>
+       <height>51</height>
       </rect>
      </property>
      <property name="autoFillBackground">
       <bool>true</bool>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-image: url(launcher/button_big.jpg);
-border-width: 1px;</string>
+      <string notr="true"/>
      </property>
      <property name="text">
       <string>Start CK2</string>
@@ -150,7 +125,7 @@ border-width: 1px;</string>
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QListWidget" name="dlcList">
+    <widget class="QListWidget" name="listDLC">
      <property name="geometry">
       <rect>
        <x>280</x>
@@ -158,6 +133,34 @@ border-width: 1px;</string>
        <width>241</width>
        <height>101</height>
       </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">selection-background-color: rgb(255, 255, 255);</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="buttonRegister">
+     <property name="geometry">
+      <rect>
+       <x>530</x>
+       <y>40</y>
+       <width>160</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Register</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>
@@ -175,10 +178,97 @@ border-width: 1px;</string>
  </customwidgets>
  <tabstops>
   <tabstop>webView</tabstop>
-  <tabstop>modList</tabstop>
+  <tabstop>listMod</tabstop>
   <tabstop>buttonRun</tabstop>
-  <tabstop>buttonReg</tabstop>
+  <tabstop>buttonRegister</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonRegister</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>buttonClickedRegister()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>609</x>
+     <y>455</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>273</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonRun</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>buttonClickedRun()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>609</x>
+     <y>515</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>webView</sender>
+   <signal>loadFinished(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>webviewLoadFinished(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>349</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>listMod</sender>
+   <signal>itemChanged(QListWidgetItem*)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>listItemChanged(QListWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>140</x>
+     <y>490</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>listDLC</sender>
+   <signal>itemChanged(QListWidgetItem*)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>listItemChanged(QListWidgetItem*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>400</x>
+     <y>490</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>275</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>listItemChanged(QListWidgetItem*)</slot>
+  <slot>buttonClickedRegister()</slot>
+  <slot>buttonClickedRun()</slot>
+  <slot>webviewLoadFinished(bool)</slot>
+ </slots>
 </ui>
